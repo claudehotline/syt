@@ -3,15 +3,8 @@
         <div class="content">
             <div class="left">地区：</div>
             <ul>
-                <li class="active">全部</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
-                <li>昌平区</li>
+                <li :class="{active:RegionFlag==''}" @click="changeRegion('')">全部</li>
+                <li v-for="item in RegionArr" :key="item.value" :class="{active:RegionFlag==item.value}" @click="changeRegion(item.value)">{{ item.name }}</li>
             </ul>
         </div>
 
@@ -24,20 +17,34 @@ import { onMounted, ref } from 'vue';
 import type { HospitalLevelAndRegionResponseData, HospitalLevelAndRegionArr } from '@/api/home/type';
 
 
-let regionArr = ref<HospitalLevelAndRegionArr>([])
+let RegionArr = ref<HospitalLevelAndRegionArr>([])
+//地区高亮的响应式数据
+let RegionFlag = ref<string>('')
 //地区组件挂载完毕获取地区数据
 onMounted(() => {
     getRegion();
 });
 
 const getRegion = async () => {
-    let result: HospitalLevelAndRegionResponseData = await reqHospitalLevelAndRegion('Beijing');
+    let result: HospitalLevelAndRegionResponseData = await reqHospitalLevelAndRegion('Beijin');
 
+    console.log(result)
     //存储全部地区的数据
     if (result.code == 200) {
-        regionArr.value = result.data;
+        RegionArr.value = result.data;
     }
 };
+
+//点击地区的按钮回调
+const changeRegion = (region: string) => {
+    //高亮响应式数据存储region数值
+    RegionFlag.value = region;
+
+    //触发自定义事件：将region参数回传给父组件
+    $emit('getRegion', region);
+}
+
+let $emit = defineEmits(['getLevel'])
 </script>
 
 <script lang="ts">
