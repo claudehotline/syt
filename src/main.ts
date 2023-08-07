@@ -12,6 +12,8 @@ import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 //国际化文件
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
+//引入pinia仓库
+import pinia from '@/store'
 //利用createApp方法创建应用实例，且将应用实例挂在到挂载点上
 const app = createApp(App);
 app.component('HospitalTop', HospitalTop);
@@ -22,5 +24,7 @@ app.use(router)
 app.use(ElementPlus,{
     locale:zhCn
 })
+//安装pinia仓库
+app.use(pinia);
 //挂载应用实例
 app.mount('#app')

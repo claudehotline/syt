@@ -8,30 +8,30 @@
                 </el-icon>
                 <span> / 医院信息</span>
             </div>
-            <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                <el-menu-item index="1">
+            <el-menu :default-active="$route.path" class="el-menu-vertical-demo">
+                <el-menu-item index="/hospital/register" @click="changeActive('/hospital/register')">
                     <el-icon><icon-menu /></el-icon>
                     <span>预约挂号</span>
                 </el-menu-item>
-                <el-menu-item index="2">
+                <el-menu-item index="/hospital/detail" @click="changeActive('/hospital/detail')">
                     <el-icon>
                         <document />
                     </el-icon>
                     <span>医院详情</span>
                 </el-menu-item>
-                <el-menu-item index="3">
+                <el-menu-item index="/hospital/notice" @click="changeActive('/hospital/notice')">
                     <el-icon>
                         <setting />
                     </el-icon>
                     <span>预约通知</span>
                 </el-menu-item>
-                <el-menu-item index="4">
+                <el-menu-item index="/hospital/close" @click="changeActive('/hospital/close')">
                     <el-icon>
                         <InfoFilled />
                     </el-icon>
                     <span>停诊信息</span>
                 </el-menu-item>
-                <el-menu-item index="5">
+                <el-menu-item index="/hospital/search" @click="changeActive('/hospital/search')">
                     <el-icon>
                         <Search />
                     </el-icon>
@@ -41,14 +41,35 @@
         </div>
         <!--右侧内容展示区域：路由组件展示位置-->
         <div class="content">
-
+            <!--子组件展示区域-->
+            <router-view></router-view>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import {onMounted} from 'vue';
+import useDetailStore from '@/store/modules/hospitalDetail';
+//获取仓库对象
+let detailStore = useDetailStore();
 //左侧菜单需要用到的图标
 import { Document, Menu as IconMenu, Location, Setting, InfoFilled, Search, HomeFilled } from '@element-plus/icons-vue'
+import { useRouter, useRoute } from "vue-router";
+
+let $router = useRouter();
+
+let $route = useRoute();
+
+//左侧菜单点击事件的回调
+const changeActive = (path:string) => {
+    //跳转到对应二级路由
+    $router.push(path);
+}
+
+//组件挂在完毕：通知pinia仓库发请求获取医院详情的数据，存储仓库当中
+onMounted(()=>{
+    detailStore.getHospital($route.query.hoscode);
+})
 </script>
 
 <style scoped lang="scss">

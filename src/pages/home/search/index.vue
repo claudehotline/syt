@@ -43,7 +43,7 @@ const fetchData = async(keyword:string, cb:any) => {
 //点击某一个推荐项
 const goDetail = (item:any) => {
     //点击推荐项目进入详情页，将来需要携带query参数(医院的编码)
-    $router.push({path:'\hospital'})
+    $router.push({path:'/hospital/register', query:{hoscode:item.hoscode}})
 
 }
 </script>
