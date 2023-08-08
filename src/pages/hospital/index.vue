@@ -48,12 +48,12 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted} from 'vue';
+import { onMounted } from 'vue';
 import useDetailStore from '@/store/modules/hospitalDetail';
 //获取仓库对象
 let detailStore = useDetailStore();
 //左侧菜单需要用到的图标
-import { Document, Menu as IconMenu, Location, Setting, InfoFilled, Search, HomeFilled } from '@element-plus/icons-vue'
+import { Document, Menu as IconMenu, Setting, InfoFilled, Search, HomeFilled } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from "vue-router";
 
 let $router = useRouter();
@@ -61,14 +61,17 @@ let $router = useRouter();
 let $route = useRoute();
 
 //左侧菜单点击事件的回调
-const changeActive = (path:string) => {
+const changeActive = (path: string) => {
     //跳转到对应二级路由
-    $router.push(path);
+    $router.push({ path, query: { hoscode: $route.query.hoscode } });
 }
 
 //组件挂在完毕：通知pinia仓库发请求获取医院详情的数据，存储仓库当中
-onMounted(()=>{
-    detailStore.getHospital($route.query.hoscode);
+onMounted(() => {
+    // 获取医院详情的数据
+    detailStore.getHospital($route.query.hoscode as string);
+    // 获取某一个医院科室的数据
+    detailStore.getDepartment($route.query.hoscode as string);
 })
 </script>
 
@@ -81,7 +84,8 @@ onMounted(()=>{
         display: flex;
         flex-direction: column;
         align-items: center;
-        .top{
+
+        .top {
             color: #7f7f7f;
         }
     }
