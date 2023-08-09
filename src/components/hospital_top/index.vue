@@ -7,7 +7,23 @@
             </div>
             <div class="right">
                 <p class="help">帮助中心</p>
-                <p class="login" @click="login">登录/注册</p>
+                <!--如果没有用户名字：显示登录注册-->
+                <p class="login" @click="login" v-if="!userStore.userInfo.name">登录/注册</p>
+                <!--登录成功显示名字-->
+                <el-dropdown v-else>
+                    <span class="el-dropdown-link">
+                        {{ userStore.userInfo.name }}
+                        <el-icon class="el-icon--right">
+                            <arrow-down />
+                        </el-icon>
+                    </span>
+                    <template #dropdown>
+                        <el-dropdown-item>实名认证</el-dropdown-item>
+                        <el-dropdown-item>挂号订单</el-dropdown-item>
+                        <el-dropdown-item>就诊人管理</el-dropdown-item>
+                        <el-dropdown-item>退出登录</el-dropdown-item>
+                    </template>
+                </el-dropdown>
             </div>
         </div>
     </div>
@@ -15,6 +31,7 @@
 
 <script setup lang="ts">
 import useUserStore from "@/store/modules/user";
+import { ArrowDown } from '@element-plus/icons-vue';
 let userStore = useUserStore();
 import { useRouter } from 'vue-router'
 let $router = useRouter()

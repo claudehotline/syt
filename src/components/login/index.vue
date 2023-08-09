@@ -9,16 +9,21 @@
                         <div v-show="scene == 0">
                             <el-form>
                                 <el-form-item>
-                                    <el-input placeholder="请输入手机号码" :prefix-icon="User"></el-input>
+                                    <el-input v-model="loginParam.phone" placeholder="请输入手机号码"
+                                        :prefix-icon="User"></el-input>
                                 </el-form-item>
                                 <el-form-item>
-                                    <el-input placeholder="请输入手机验证码" :prefix-icon="Lock"></el-input>
+                                    <el-input v-model="loginParam.code" placeholder="请输入手机验证码"
+                                        :prefix-icon="Lock"></el-input>
                                 </el-form-item>
                                 <el-form-item>
-                                    <el-button>获取验证码</el-button>
+                                    <el-button :disabled="!isPhone || flag ? true : false">
+                                        <CountDown v-if="flag" :flag="flag" @getFlag="getFlag" />
+                                        <span v-else @click="getCode">获取验证码</span>
+                                    </el-button>
                                 </el-form-item>
                             </el-form>
-                            <el-button style="width:100%" type="primary" size="default" @click="">用户登录</el-button>
+                            <el-button style="width:100%" type="primary" size="default" :disabled="!isPhone||loginParam.code.length<6?true:false" @click="login">用户登录</el-button>
                             <div class="bottom" @click="changeScene">
                                 <p>微信扫码登录</p>
                                 <svg t="1691467835691" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -32,8 +37,8 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="webchat">
-                            <!--微信扫码登录的结构-->
+                        <div class="webchat" v-show="scene == 1">
+                            微信扫码登录的结构
                         </div>
                     </div>
                 </el-col>
@@ -79,19 +84,78 @@
 </template>
 
 <script setup lang="ts">
+//引入倒计时组件
+import CountDown from '../countdown/index.vue';
+import { ref, reactive, computed } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 //获取user仓库的数据(visible)可以控制login组件的对话框显示与隐藏
 import useUserStore from "@/store/modules/user";
+import { ElMessage } from 'element-plus';
 let userStore = useUserStore();
-
-import { ref } from 'vue'
-
+//定义一个响应式数据控制倒计时组件显示与隐藏
+let flag = ref<boolean>(false);//flag如果为真，开启倒计时
 let scene = ref<number>(0); //0代表手机号码登录，1代表微信扫码登录
-
+//收集表单数据 --手机号码
+let loginParam = reactive({
+    phone: '',
+    code: '', //收集验证码
+});
+//计算出当前表单元素收集的内容是否是手机号码格式
+let isPhone = computed(() => {
+    //手机号的正则表达式
+    const reg = /^1((34[0-8])|(8\d{2})|(([35][0-35-9]|4[579]|66|7[35678]|9[1389])\d{1}))\d{7}$/;
+    //返回布尔值：真代表手机号码、假代表不是手机号码
+    return reg.test(loginParam.phone);
+})
 //点击微信扫码切换微信扫码
-const changeScene = ()=> {
+const changeScene = () => {
     scene.value = 1;
 }
+//获取验证码按钮的回调
+const getCode = async () => {
+    //解决element-plus按钮禁用还能点击的问题
+    // if(!isPhone.value||flag) {
+    //     return;
+    // }
+    //开启倒计时模式，倒计时组件显示出来
+    flag.value = true;
+    //通知pinia仓库存储验证码
+    try {
+        // 获取验证码成功
+        await userStore.getCode(loginParam.phone)
+        loginParam.code = userStore.code
+    } catch (error) {
+        // 获取验证码失败
+        ElMessage({
+            type: 'error',
+            message: (error as Error).message
+        })
+    }
+}
+
+//计数器子组件绑定的自定义事件
+//倒计时为零的时候，通知父组件倒计时组件隐藏
+const getFlag = (val: boolean) => {
+    //倒计时模式结束
+    flag.value = val;
+}
+
+//点击用户登录按钮的回调
+const login = async ()=> {
+    //发起登录请求
+    //登录请求成功：顶部组件需要展示用户名字、对话框关闭
+    //登录请求失败：弹出对应登录失败的错误信息
+    try{
+        await userStore.userLogin(loginParam);
+        //如果登录成功关闭对话框
+        userStore.visible = false;
+    }catch(error){
+        ElMessage({
+            type: 'error',
+            message:(error as Error).message
+        })
+    }
+};
 </script>
 
 <style scoped lang="scss">
