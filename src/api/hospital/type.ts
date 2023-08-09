@@ -68,10 +68,31 @@ export interface LoginData{
 //登录接口返回用户信息数据
 export interface UserInfo{
     name: string,
-    toke: string
+    token: string
 }
 
 //登录接口返回的数据的ts类型
 export interface UserLoginResponseData extends ResponseData{
     data:UserInfo
+}
+
+//定义微信扫码登录返回的数据ts类型
+export interface WXLogin {
+    redirectUri: string,
+    appid: string,
+    scope: string,
+    state: string
+}
+
+export interface WXLoginResponseData extends ResponseData{
+    data: WXLogin,
+}
+
+export interface baseMap{
+    workDateString: string,
+    releaseTime: string,
+    bigname: string,
+    stopTime: string,
+    depname: string,
+    hosname: string
 }

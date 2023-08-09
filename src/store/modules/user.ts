@@ -2,14 +2,15 @@
 import { defineStore } from 'pinia';
 //引入获取验证码的请求方法
 import { reqCode, reqUserLogin } from '@/api/hospital';
-import type { LoginData, UserLoginResponseData, UserInfo } from '@/api/hospital/type';
+import type { LoginData, UserLoginResponseData } from '@/api/hospital/type';
 import type { UserState } from './interface';
+import { GET_TOKEN, SET_TOKEN, REMOVE_TOKEN } from '@/utils/user'
 const useUserStore = defineStore('User', {
     state: ():UserState => {
         return {
             visible: false,
             code: '', //存储用户的验证码
-            userInfo: JSON.parse(localStorage.getItem('USERINFO') as string) || {}
+            userInfo: JSON.parse(GET_TOKEN() as string) || {}
         }
     },
     actions: {
@@ -33,12 +34,31 @@ const useUserStore = defineStore('User', {
             if(result.code==200){
                 this.userInfo = result.data;
                 //本地存储持久化存储用户信息
-                localStorage.setItem('USERINFO', JSON.stringify(this.userInfo));
+                SET_TOKEN(JSON.stringify(this.userInfo));
                 //返回一个成功的Promise
                 return 'ok';
             } else {
                 return Promise.reject(new Error(result.message))
             }
+        },
+
+        //退出登录方法
+        logout(){
+            this.userInfo = {name:'', token:''};
+            //清空本地存储的数据
+            REMOVE_TOKEN();
+        },
+        //查询微信扫码的结果（看本地存储是否存储数据）
+        queryState(){
+            //开启定时器每隔一段时间：本地存储是否有用户信息
+            let timer = setInterval(() => {
+                //本地存储已有数据：扫描成功
+                if(GET_TOKEN()){
+                    this.visible = false;
+                    this.userInfo = JSON.parse(GET_TOKEN() as string);
+                    clearInterval(timer);
+                }
+            }, 1000)
         }
 
     },

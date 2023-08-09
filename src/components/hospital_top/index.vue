@@ -21,7 +21,7 @@
                         <el-dropdown-item>实名认证</el-dropdown-item>
                         <el-dropdown-item>挂号订单</el-dropdown-item>
                         <el-dropdown-item>就诊人管理</el-dropdown-item>
-                        <el-dropdown-item>退出登录</el-dropdown-item>
+                        <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
                     </template>
                 </el-dropdown>
             </div>
@@ -42,6 +42,14 @@ const goHome = () => {
 //点击登录与注册按钮的时候弹出对话框
 const login = () => {
     userStore.visible = true;
+}
+
+//退出登录按钮的回调
+const logout = () => {
+    //通知pinia仓库清除用户相关信息
+    userStore.logout();
+    //编程式导航跳转到首页
+    $router.push({path: '/home'});
 }
 </script>
 

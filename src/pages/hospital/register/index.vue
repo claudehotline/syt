@@ -56,7 +56,7 @@
                     <h1 class="cur">{{ department.depname }}</h1>
                     <!--每个大科室下小科室-->
                     <ul>
-                        <li @click="showLogin" v-for="(item) in department.children" :key="item.depcode">{{ item.depname }}</li>
+                        <li @click="showLogin(item)" v-for="(item) in department.children" :key="item.depcode">{{ item.depname }}</li>
                     </ul>
                 </div>
             </div>
@@ -66,11 +66,16 @@
 
 <script setup lang="ts">
 import {ref} from 'vue';
-import useUserStore from "@/store/modules/user";
-let userStore = useUserStore();
+// import useUserStore from "@/store/modules/user";
+import {useRouter, useRoute} from 'vue-router';
+// let userStore = useUserStore();
 //引入医院详情仓库的数据
 import useDetailStore from '@/store/modules/hospitalDetail';
 let hospitalStore = useDetailStore();
+//获取路由器
+let $router= useRouter();
+//获取路由对象
+let $route = useRoute();
 //控制科室高亮的响应式数据
 let currentIndex = ref<number>(0)
 //左侧大的科室点击的事件
@@ -86,8 +91,13 @@ const changeIndex = (index:number) => {
 }
 
 //点击科室的回调
-const showLogin = () => {
-    userStore.visible = true;
+//item:即为用户选中的科室数据
+const showLogin = (item:any) => {
+    //登录组件对话框弹出
+    // userStore.visible = true;
+    //点击某一个医院科室按钮，进入到相应的预约挂号页面
+    //跳转到预约挂号详情页面
+    $router.push({path:'/hospital/register_step1', query:{hoscode:$route.query.hoscode, depcode:item.depcode}})
 }
 </script>
 

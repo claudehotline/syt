@@ -1,18 +1,18 @@
 <template>
     <div class="login_container">
-        <el-dialog v-model="userStore.visible" title="用户登录">
+        <el-dialog v-model="userStore.visible" title="用户登录" ref="dialog">
             <!--对话框身体部分的结构-->
             <el-row>
                 <!--左侧结构：手机号码登录或微信登录-->
                 <el-col :span="12">
                     <div class="login">
                         <div v-show="scene == 0">
-                            <el-form>
-                                <el-form-item>
+                            <el-form :model="loginParam" :rules="rules" ref="form">
+                                <el-form-item prop="phone">
                                     <el-input v-model="loginParam.phone" placeholder="请输入手机号码"
                                         :prefix-icon="User"></el-input>
                                 </el-form-item>
-                                <el-form-item>
+                                <el-form-item prop="code">
                                     <el-input v-model="loginParam.code" placeholder="请输入手机验证码"
                                         :prefix-icon="Lock"></el-input>
                                 </el-form-item>
@@ -23,7 +23,9 @@
                                     </el-button>
                                 </el-form-item>
                             </el-form>
-                            <el-button style="width:100%" type="primary" size="default" :disabled="!isPhone||loginParam.code.length<6?true:false" @click="login">用户登录</el-button>
+                            <el-button style="width:100%" type="primary" size="default"
+                                :disabled="!isPhone || loginParam.code.length < 6 ? true : false"
+                                @click="login">用户登录</el-button>
                             <div class="bottom" @click="changeScene">
                                 <p>微信扫码登录</p>
                                 <svg t="1691467835691" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -38,7 +40,17 @@
                             </div>
                         </div>
                         <div class="webchat" v-show="scene == 1">
-                            微信扫码登录的结构
+                            <!--在这个容器当中显示微信扫码的页面-->
+                            <div id="login_container"></div>
+                            <div class="phone" @click="handler">
+                                <p>手机短信验证码登录</p>
+                                <svg t="1691571117819" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                    xmlns="http://www.w3.org/2000/svg" p-id="4088" width="16" height="16">
+                                    <path
+                                        d="M820.409449 797.228346q0 25.19685-10.07874 46.866142t-27.716535 38.299213-41.322835 26.204724-50.897638 9.574803l-357.795276 0q-27.212598 0-50.897638-9.574803t-41.322835-26.204724-27.716535-38.299213-10.07874-46.866142l0-675.275591q0-25.19685 10.07874-47.370079t27.716535-38.80315 41.322835-26.204724 50.897638-9.574803l357.795276 0q27.212598 0 50.897638 9.574803t41.322835 26.204724 27.716535 38.80315 10.07874 47.370079l0 675.275591zM738.771654 170.330709l-455.559055 0 0 577.511811 455.559055 0 0-577.511811zM510.992126 776.062992q-21.165354 0-36.787402 15.11811t-15.622047 37.291339q0 21.165354 15.622047 36.787402t36.787402 15.622047q22.173228 0 37.291339-15.622047t15.11811-36.787402q0-22.173228-15.11811-37.291339t-37.291339-15.11811zM591.622047 84.661417q0-8.062992-5.03937-12.598425t-11.086614-4.535433l-128 0q-5.03937 0-10.582677 4.535433t-5.543307 12.598425 5.03937 12.598425 11.086614 4.535433l128 0q6.047244 0 11.086614-4.535433t5.03937-12.598425z"
+                                        p-id="4089"></path>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                 </el-col>
@@ -77,24 +89,29 @@
                 </el-col>
             </el-row>
             <template #footer>
-                <el-button type="primary" size="default">关闭窗口</el-button>
+                <el-button type="primary" size="default" @click="closeDialog">关闭窗口</el-button>
             </template>
         </el-dialog>
     </div>
 </template>
 
 <script setup lang="ts">
+//引入wx扫码登录参数请求
+import { reqWxLogin } from '@/api/hospital';
 //引入倒计时组件
 import CountDown from '../countdown/index.vue';
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 //获取user仓库的数据(visible)可以控制login组件的对话框显示与隐藏
 import useUserStore from "@/store/modules/user";
+import type { WXLoginResponseData } from '@/api/hospital/type';
 import { ElMessage } from 'element-plus';
 let userStore = useUserStore();
 //定义一个响应式数据控制倒计时组件显示与隐藏
 let flag = ref<boolean>(false);//flag如果为真，开启倒计时
 let scene = ref<number>(0); //0代表手机号码登录，1代表微信扫码登录
+//获取相应的form组件实例
+let form = ref<any>()
 //收集表单数据 --手机号码
 let loginParam = reactive({
     phone: '',
@@ -108,8 +125,25 @@ let isPhone = computed(() => {
     return reg.test(loginParam.phone);
 })
 //点击微信扫码切换微信扫码
-const changeScene = () => {
+const changeScene = async () => {
     scene.value = 1;
+    //发请求获取微信扫码二维码需要参数
+    //在向尚硅谷学校的服务器发请求，获取微信扫码登录页面参数
+    //还需要携带一个参数，从定向项目的页面
+    let redirect_URI = encodeURIComponent(window.location.origin + 'wxlogin');
+    let result: WXLoginResponseData = await reqWxLogin(redirect_URI);
+    //生成微信扫描登录的页面
+    //@ts-ignore
+    new WxLogin({
+        self_redirect: true,
+        id: "login_container",//显示二维码容器的id
+        appid: result.data.appid,//应用的唯一标识
+        scope: "snsapi_login",//微信扫码的应用已经授权了
+        redirect_uri: result.data.redirectUri, //填写授权的回调域路径，授权后，微信服务器推送code的地址
+        state: result.data.state, //state就是学校的服务器重定向的地址，携带用户的信息
+        style: "black",
+        href: "",
+    });
 }
 //获取验证码按钮的回调
 const getCode = async () => {
@@ -141,21 +175,90 @@ const getFlag = (val: boolean) => {
 }
 
 //点击用户登录按钮的回调
-const login = async ()=> {
+const login = async () => {
+    //保证表单校验两项都符合条件
+    await form.value.validate();
     //发起登录请求
     //登录请求成功：顶部组件需要展示用户名字、对话框关闭
     //登录请求失败：弹出对应登录失败的错误信息
-    try{
+    try {
         await userStore.userLogin(loginParam);
         //如果登录成功关闭对话框
         userStore.visible = false;
-    }catch(error){
+    } catch (error) {
         ElMessage({
             type: 'error',
-            message:(error as Error).message
+            message: (error as Error).message
         })
     }
 };
+
+//自定义校验规则：手机号码自定义校验规则
+const validatorPhone = (rule: any, value: any, callBack: any) => {
+    //rule:即为表单校验对象
+    //value:即为当前文本的内容
+    //callback:回调函数
+    const reg = /^1((34[0-8])|(8\d{2})|(([35][0-35-9]|4[579]|66|7[35678]|9[1389])\d{1}))\d{7}$/;
+    if (reg.test(value)) {
+        callBack();
+    } else {
+        callBack(new Error('请输入正确的手机号码格式'))
+    }
+}
+
+//自定义校验规则：手机验证码自定义校验规则
+const validatorCode = (rule: any, value: any, callBack: any) => {
+    //rule:即为表单校验对象
+    //value:即为当前文本的内容
+    //callback:回调函数
+    if (/^\d{6}$/.test(value)) {
+        callBack();
+    } else {
+        callBack(new Error('请输入正确的验证码格式'))
+    }
+}
+
+//表单校验的规则对象
+const rules = {
+    //收集号码的校验规则
+    // phone: [
+    //     {required:true, message:'手机号码务必是11位', trigger: 'change', min: 11}
+    // ],
+    // code: [
+    //     {required:true, message:'验证码必须是6为', trigger: 'blue', min: 6}
+    // ]
+    phone: [{ trigger: 'change', validator: validatorPhone }],
+    code: [{ trigger: 'change', validator: validatorCode }]
+}
+
+// //对话框关闭的回调
+// const close = ()=>{
+//     //清空收集的数据
+//     Object.assign(loginParam, { phone:'', code:'' });
+//     //清除上一次校验的结果
+//     form.value.resetFields();
+// }
+
+//关闭窗口按钮的对调
+const closeDialog = () => {
+    userStore.visible = false;
+    // //清空收集的数据
+    // Object.assign(loginParam, { phone:'', code:'' });
+    // //清除上一次校验的结果
+    // form.value.resetFields();
+}
+
+//点击手机验证码盒子的回调
+const handler = () => {
+    scene.value = 0;
+}
+
+//监听场景的数值
+watch(()=>scene.value, (val:number)=> {
+    if(val===1){
+        userStore.queryState()
+    }
+})
 </script>
 
 <style scoped lang="scss">
@@ -168,6 +271,21 @@ const login = async ()=> {
     .login {
         border: 1px solid #ccc;
         padding: 20px;
+
+        .webchat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .phone {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                p{
+                    margin: 10px 0px;
+                }
+            }
+        }
     }
 
     .bottom {
@@ -208,5 +326,4 @@ const login = async ()=> {
         font-size: 20px;
         font-weight: 900;
     }
-}
-</style>
+}</style>
