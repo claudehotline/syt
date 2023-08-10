@@ -21,7 +21,25 @@
 </template>
 
 <script setup lang="ts">
+import {onMounted, ref} from 'vue';
+import { reqHospitalWork } from '@/api/hospital';
+import { useRoute} from 'vue-router';
+import type {HospitalWorkData} from '@/api/hospital/type';
+//获取路由对象
+let $route = useRoute()
+let pageNo = ref<number>(1);
+//每一页展示几条数据
+let limit = ref<number>(6);
+//组件挂载完毕发一次请求
+onMounted(()=>{
+    fetchWorkData();
+});
 
+//获取挂号的数据
+const fetchWorkData = async ()=>{
+    let result:HospitalWorkData = await reqHospitalWork(pageNo.value, limit.value, $route.query.hoscode as string, $route.query.depcode as string);
+    
+}
 </script>
 
 <style scoped lang="scss">

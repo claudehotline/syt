@@ -88,11 +88,31 @@ export interface WXLoginResponseData extends ResponseData{
     data: WXLogin,
 }
 
-export interface baseMap{
+export interface BaseMap{
     workDateString: string,
     releaseTime: string,
     bigname: string,
     stopTime: string,
     depname: string,
     hosname: string
+}
+
+export interface WorkData {
+    workDate: string,
+    workDateMd: string,
+    dayofWeek: string,
+    docCount: number,
+    reservedNumber: null,
+    availableNumber: number,
+    status: number
+}
+
+export type bookingScheduleList = WorkData[]
+
+export interface HospitalWorkData extends ResponseData{
+    data:{
+        total:number,
+        bookingScheduleList:bookingScheduleList,
+        baseMap:BaseMap
+    }
 }
