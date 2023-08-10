@@ -13,9 +13,13 @@
       <div class="container">
         <div
           class="item"
-          :class="{ active: item.status == -1 || item.availableNumber == -1 }"
+          :class="{
+            active: item.status == -1 || item.availableNumber == -1,
+            cur: item.workDate == workTime.workDate,
+          }"
           v-for="item in workData.bookingScheduleList"
           :key="item"
+          @click="changeTime(item)"
         >
           <div class="top1">{{ item.workDate }}{{ item.dayOfWeek }}</div>
           <div class="bottom">
@@ -41,12 +45,12 @@
     <!--底部展示相应医生的结构-->
     <div class="bottom">
       <!--展示即将放号的时间-->
-      <div class="will">
+      <div class="will" v-if="workTime.status == 1">
         <span class="time">2023年6月3日08:30</span>
         <span class="willText">放号</span>
       </div>
       <!--展示医生的结构-->
-      <div class="doctor">
+      <div class="doctor" v-else>
         <div class="morning">
           <!--顶部文字提示-->
           <div class="tip">
@@ -69,40 +73,24 @@
             <span class="text">上午号源</span>
           </div>
           <!--每一个医生的信息-->
-          <div class="doc_info">
+          <div class="doc_info" v-for="doctor in morningArr" :key="doctor.id">
             <!--展示医生的名字、技能-->
             <div class="left">
               <div class="info">
-                <span>副主任医师</span>
+                <span>{{ doctor.title }}</span>
                 <span>|</span>
-                <span>xxx</span>
+                <span>{{ doctor.docname }}</span>
               </div>
               <div class="skill">
-                骨质疏松和骨代谢疾病、糖尿病、甲状腺疾病。
+                {{ doctor.skill }}
               </div>
             </div>
             <!--展示-->
             <div class="right">
-              <div class="money">￥100元</div>
-              <el-button type="primary" size="default">100</el-button>
-            </div>
-          </div>
-          <div class="doc_info">
-            <!--展示医生的名字、技能-->
-            <div class="left">
-              <div class="info">
-                <span>副主任医师</span>
-                <span>|</span>
-                <span>xxx</span>
-              </div>
-              <div class="skill">
-                骨质疏松和骨代谢疾病、糖尿病、甲状腺疾病。
-              </div>
-            </div>
-            <!--展示-->
-            <div class="right">
-              <div class="money">￥100元</div>
-              <el-button type="primary" size="default">100</el-button>
+              <div class="money">￥{{ doctor.amount }}元</div>
+              <el-button type="primary" size="default" @click="goStep2(doctor)">{{
+                doctor.availableNumber
+              }}</el-button>
             </div>
           </div>
         </div>
@@ -133,40 +121,27 @@
             <span class="text">下午号源</span>
           </div>
           <!--每一个医生的信息-->
-          <div class="doc_info">
+          <div class="doc_info" v-for="doctor in afterArr" :key="doctor.id">
             <!--展示医生的名字、技能-->
             <div class="left">
               <div class="info">
-                <span>副主任医师</span>
+                <span>{{ doctor.title }}</span>
                 <span>|</span>
-                <span>xxx</span>
+                <span>{{ doctor.docname }}</span>
               </div>
               <div class="skill">
-                骨质疏松和骨代谢疾病、糖尿病、甲状腺疾病。
+                {{ doctor.skill }}
               </div>
             </div>
             <!--展示-->
             <div class="right">
-              <div class="money">￥100元</div>
-              <el-button type="primary" size="default">100</el-button>
-            </div>
-          </div>
-          <div class="doc_info">
-            <!--展示医生的名字、技能-->
-            <div class="left">
-              <div class="info">
-                <span>副主任医师</span>
-                <span>|</span>
-                <span>xxx</span>
-              </div>
-              <div class="skill">
-                骨质疏松和骨代谢疾病、糖尿病、甲状腺疾病。
-              </div>
-            </div>
-            <!--展示-->
-            <div class="right">
-              <div class="money">￥100元</div>
-              <el-button type="primary" size="default">100</el-button>
+              <div class="money">￥{{ doctor.amount }}</div>
+              <el-button
+                type="primary"
+                size="default"
+                @click="goStep2(doctor)">
+                {{ doctor.availableNumber }}
+              </el-button>
             </div>
           </div>
         </div>
@@ -176,17 +151,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { reqHospitalWork } from '@/api/hospital';
-import { useRoute } from 'vue-router';
+import { onMounted, ref, computed } from 'vue';
+import {
+  Doctor,
+  DocArr,
+  reqHospitalWork,
+  reqHospitalDoctor,
+  DoctorResponseData,
+} from '@/api/hospital';
+import { useRoute, useRouter } from 'vue-router';
 import type { HospitalWorkData } from '@/api/hospital/type';
 //获取路由对象
 let $route = useRoute();
+let $router = useRouter();
 let pageNo = ref<number>(1);
 //每一页展示几条数据
 let limit = ref<number>(6);
 //存储医院挂号的数据
 let workData = ref<any>({});
+//存储排班日期：当前数据的第一个
+let workTime = ref({});
+//存储排班医生的数据
+let docArr = ref<DocArr>([]);
 //组件挂载完毕发一次请求
 onMounted(() => {
   fetchWorkData();
@@ -200,9 +186,62 @@ const fetchWorkData = async () => {
     $route.query.hoscode as string,
     $route.query.depcode as string,
   );
+
+  console.log(result.data);
   if (result.code == 200) {
     workData.value = result.data;
+    //存储第一天的日期的数据
+    workTime.value = workData.value.bookingScheduleList[0];
+    //获取一次医生的数据
+    getDoctorWorkDate();
   }
+};
+
+//获取某一天医生排班的数据
+const getDoctorWorkDate = async () => {
+  let hoscode: string = $route.query.hoscode as string;
+  //科室的编号
+  let depcode: string = $route.query.depcode as string;
+  // 时间
+  let workDate: string = workTime.value.workDate;
+
+  let result: DoctorResponseData = await reqHospitalDoctor(
+    hoscode,
+    depcode,
+    workDate,
+  );
+
+  if (result.code == 200) {
+    docArr.value = result.data;
+  }
+};
+
+//点击顶部某一天的时候触发回调
+const changeTime = (item: any) => {
+  //存储用户选择的那一天数据
+  workTime.value = item;
+  //在发一次
+  getDoctorWorkDate();
+};
+
+//计算出上午排班的医生
+let morningArr = computed(() => {
+  return docArr.value.filter((doc: Doctor) => {
+    return doc.workTime == 0;
+  });
+});
+
+//计算出下午排班的医生
+let afterArr = computed(() => {
+  return docArr.value.filter((doc: Doctor) => {
+    return doc.workTime == 1;
+  });
+});
+
+//路由跳转进入路由选择就诊人页面
+const goStep2 = (doctor: Doctor) => {
+  //编程式导航进行路由跳转且携带医生的ID
+  $router.push({ path: "/hospital/register_step2", query: { docId: doctor.id } });
 };
 </script>
 
@@ -245,16 +284,16 @@ const fetchWorkData = async () => {
         width: 100%;
         border: 1px solid skyblue;
         margin: 0px 5px;
-
-        // display: flex;
-        // flex-direction: column;
-        // align-items: center;
+        transition: all 0.5s;
         &.active {
           border: 1px solid #ccc;
           color: #7f7f7f;
           .top1 {
             background: #ccc;
           }
+        }
+        &.cur {
+          transform: scale(1.1);
         }
         .top1 {
           background: #e8f2ff;
