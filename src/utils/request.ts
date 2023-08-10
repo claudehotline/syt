@@ -3,6 +3,8 @@
 //请求拦截器，一般可以在请求头中携带公共的参数:token
 //响应拦截器，可以简化服务器返回的数据，处理http网络错误
 import axios from 'axios'
+//引入用户先关的仓库
+import useUserStore from '@/store/modules/user';
 import { ElMessage } from 'element-plus';
 
 //创建一个axios实例,可以设置基础路径、超时时间的设置
@@ -13,6 +15,12 @@ const request = axios.create({
 
 //请求拦截器
 request.interceptors.request.use((config)=>{
+    //获取用户仓库
+    let userStore = useUserStore();
+    //token:公共参数，如果用户登录需要携带
+    if(userStore.userInfo.token){
+        config.headers.token = userStore.userInfo.token;
+    }
     //config:请求拦截器回调注入的对象（配置对象），配置对象的身上最重要的一件事情headers属性
     //可以通过请求头携带公共参数-token
     return config;

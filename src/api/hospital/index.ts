@@ -13,7 +13,7 @@ enum API {
     //获取微信扫码登录需要的参数
     WXLOGIN_URL = '/user/weixin/getLoginParam/',
     //获取某一个医院的某一个科室预约挂号数据
-    HOSPITALWORK_URL = '/api/hosp/hospital/auth/getBookingScheduleRule/'
+    HOSPITALWORK_URL = '/hosp/hospital/auth/getBookingScheduleRule/'
 }
 
 export const reqHospitalDetail = (hoscode: string) => request.get<any, HospitalDetail>(API.HOSPITALDETAIL_URL + hoscode);
