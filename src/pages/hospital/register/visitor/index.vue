@@ -2,30 +2,34 @@
   <div class="visitor">
     <div class="top">
       <div class="left">
-        <span class="free">医保</span>
-        <span class="username">xxx</span>
+        <span class="free">{{ user.isInsure==1?'医保':'自费' }}</span>
+        <span class="username">{{ user.name }}</span>
       </div>
       <div class="right">
         <el-button circle type="primary" size="default" :icon="Edit"></el-button>
       </div>
     </div>
     <div class="bottom">
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
-      <p>证件类型：身份证</p>
+      <p>证件类型：{{ user.param.certificatesTypeString }}</p>
+      <p>证件号码：{{ user.cerifiacatesNo }}</p>
+      <p>用户性别：{{ user.sex==0?'女生':'男士' }}</p>
+      <p>出生日期：{{ user.birthdate }}</p>
+      <p>手机号码：{{ user.phone }}</p>
+      <p>婚姻状况：{{ user.isMarry==0?'未婚':'已婚' }}</p>
+      <p>当前住址：{{ user.param.cityString }}</p>
+      <p>详细地址：{{ user.param.fullAddress }}</p>
+      <!--红色已经选择的盒子-->
+      <transition name="confirm">
+        <div class="confirm" v-if="index==currentIndex">已选择</div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Edit } from '@element-plus/icons-vue';
+//接收父组件传递过来的就诊人信息
+defineProps(['user', 'index', 'currentIndex'])
 </script>
 
 <style scoped lang="scss">
@@ -37,7 +41,7 @@ import { Edit } from '@element-plus/icons-vue';
     background:#e5e5e5;
     display: flex;
     justify-content: space-around;
-    algin-items: center;
+    align-items: center;
     .left{
       .free{
         background:white;
@@ -53,9 +57,37 @@ import { Edit } from '@element-plus/icons-vue';
   }
 
   .bottom {
-    padding: 10px;
+    position: relative;
+    padding: 20px;
     p{
       line-height: 40px;
+    }
+    .confirm{
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      color: red;
+      border-radius: 50%;
+      border: 1px dashed red;
+      text-align: center;
+      line-height: 200px;
+      left: 20%;
+      top: 20%;
+      opacity: 0.5;
+      transform: rotate(35deg);
+      font-weight: 900;
+    }
+
+    .confirm-enter-from{
+      transform: scale(1);
+    }
+
+    .confirm-enter-active{
+      transition: all .3s;
+    }
+
+    .confirm-enter-to{
+      transform: scale(1.2);
     }
   }
 }

@@ -1,6 +1,8 @@
 //引入二次封装axios
 import request from '@/utils/request';
 import type {
+  DoctorInfoData,
+  UserResponseData,
   DoctorResponseData,
   HospitalWorkData,
   WXLoginResponseData,
@@ -24,6 +26,10 @@ enum API {
   HOSPITALWORK_URL = '/hosp/hospital/auth/getBookingScheduleRule/',
   //获取医院某一个科室某一天相应医生排班的数据
   HOSPITALDOCTOR_URL = '/hosp/hospital/auth/findScheduleList/',
+  //获取某一个账号下就诊人的信息
+  GETUSER_URL = '/user/patient/auth/findAll',
+  //获取挂号医生的信息
+  GETDOCTOR_URL='/hosp/hospital/getSchedule/'
 }
 
 export const reqHospitalDetail = (hoscode: string) =>
@@ -63,3 +69,10 @@ export const reqHospitalDoctor = (
   request.get<any, DoctorResponseData>(
     API.HOSPITALDOCTOR_URL + `${hoscode}/${depcode}/${workDate}`,
   );
+
+
+//获取某一个账号下就诊人信息
+export const reqGetUser = () => request.get<any, UserResponseData>(API.GETUSER_URL);
+
+//获取挂号医生的信息
+export const reqDoctorInfo = (scheduleId:string) => request.get<any, DoctorInfoData>(API.GETDOCTOR_URL+scheduleId);

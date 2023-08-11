@@ -18,9 +18,9 @@
                         </el-icon>
                     </span>
                     <template #dropdown>
-                        <el-dropdown-item>实名认证</el-dropdown-item>
-                        <el-dropdown-item>挂号订单</el-dropdown-item>
-                        <el-dropdown-item>就诊人管理</el-dropdown-item>
+                        <el-dropdown-item @click="goUser('/user/certification')">实名认证</el-dropdown-item>
+                        <el-dropdown-item @click="goUser('/user/order')">挂号订单</el-dropdown-item>
+                        <el-dropdown-item @click="goUser('/user/patient')">就诊人管理</el-dropdown-item>
                         <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
                     </template>
                 </el-dropdown>
@@ -50,6 +50,11 @@ const logout = () => {
     userStore.logout();
     //编程式导航跳转到首页
     $router.push({path: '/home'});
+}
+
+//点击顶部下拉菜单进行路由跳转
+const goUser = (path:string) => {
+    $router.push({path:path});
 }
 </script>
 
