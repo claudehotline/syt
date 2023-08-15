@@ -17,9 +17,11 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import pinia from '@/store'
 //利用createApp方法创建应用实例，且将应用实例挂在到挂载点上
 const app = createApp(App);
+import Visitor from '@/components/visitor/visitor.vue';
 app.component('HospitalTop', HospitalTop);
 app.component('HospitalBottom', HospitalBottom);
 app.component('Login', Login);
+app.component('Visitor', Visitor);
 //安装vue-router
 app.use(router)
 //安装element-plus

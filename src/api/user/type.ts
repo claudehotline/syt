@@ -117,3 +117,103 @@ export interface UserParams {
     name: string
 }
 
+//代表的是一个订单的数据类型
+export interface Order {
+    "id": number,
+    "createTime": string,
+    "updateTime": string,
+    "isDeleted": number,
+    "param": {
+        "orderStatusString": string
+    },
+    "userId": number,
+    "outTradeNo": string,
+    "hoscode": string,
+    "hosname": string,
+    "depcode": string,
+    "depname": string,
+    "scheduleId": null,
+    "title": string,
+    "reserveDate": string,
+    "reserveTime": number,
+    "patientId": number,
+    "patientName": string,
+    "patientPhone": string,
+    "hosRecordId": string,
+    "number": number,
+    "fetchTime": string,
+    "fetchAddress": string,
+    "amount": number,
+    "quitTime": string,
+    "orderStatus": number
+}
+
+export type Records = Order[]
+
+//获取订单接口数据的ts类型
+export interface UserOrderInfoResponseData extends ResponseData {
+    data: {
+        total: number,
+        records: Records,
+        size: number,
+        current: number,
+        orders: [],
+        hitCount: boolean,
+        searchCount: boolean,
+        pages: number
+    }
+}
+
+//代表的是就诊人的ts类型
+export interface User {
+    id:number,
+    createTime: string,
+    updateTime: string,
+    isDeleted: number,
+    param:{
+        certificatesTypeString: string,
+        contactsCertificatesTypeString: string,
+        cityString: null,
+        fullAddress: string,
+        districtString: null,
+        provinceString: null,
+    },
+    userId: number,
+    name: string,
+    certificatesType: string,
+    certificatesNo: string,
+    sex: number,
+    birthdate: string,
+    phone: string,
+    isMarry: number,
+    provinceCode: null,
+    cityCode: null,
+    districtCode: null,
+    address: string,
+    contactsName: string,
+    contactsCertificatesType: string,
+    contactsCertificatesNo: string,
+    contactsPhone: string,
+    isInsure: number,
+    cardNo: null,
+    status: string,
+}
+
+export type AllUser = User[];
+
+//获取全部就诊人的ts类型
+export interface AllUserResponseData extends ResponseData{
+    data: AllUser;
+}
+
+//订单状态数据ts类型
+export interface OrderState {
+    comment: string,
+    status: number,
+}
+
+export type AllOrderState = OrderState[];
+//全部订单状态码接口返回数据的ts类型
+export interface AllOrderStateResponseData extends ResponseData {
+    data: AllOrderState;
+} 

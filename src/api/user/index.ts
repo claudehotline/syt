@@ -1,6 +1,6 @@
 //引入二次封装的axios
 import request from '@/utils/request';
-import type { UserParams, CertificationTypeResponseData, UserInfoResponseData, QrCode, SubmitOrder, OrderResponseData,PayResult } from './type';
+import type { AllOrderStateResponseData, AllUserResponseData, UserOrderInfoResponseData, UserParams, CertificationTypeResponseData, UserInfoResponseData, QrCode, SubmitOrder, OrderResponseData,PayResult } from './type';
 
 enum API{
     SUBMITORDER_URL='/order/orderInfo/auth/submitOrder/',
@@ -17,7 +17,13 @@ enum API{
     //获取证件类型的接口的地址
     CERTIFICATIONTYPE_URL='/cmn/dict/findByDictCode/',
     //用户认证的接口
-    USERCERTIFICATION_URL='/user/auth/userAuth'
+    USERCERTIFICATION_URL='/user/auth/userAuth',
+    //获取用户订单号的数据
+    USERORDERINFO_URL='/order/orderInfo/auth/',
+    //获取全部就诊人的信息
+    ALLUSER_URL='/user/patient/auth/findAll',
+    //获取订单的状态
+    ORDERSTATE_URL='/order/orderInfo/auth/getStatusList'
 }
 
 //提交订单
@@ -36,3 +42,9 @@ export const reqUserInfo = () => request.get<any,UserInfoResponseData>(API.USERI
 export const  reqCertificationType = (CertificatesType='CertificatesType') => request.get<any,CertificationTypeResponseData>(API.CERTIFICATIONTYPE_URL+CertificatesType);
 //用户认证接口
 export const reqUserCertification = (data:UserParams)=>request.post<any,any>(API.USERCERTIFICATION_URL, data);
+//获取订单数据接口
+export const reqUserOrderInfo = (page:number, limit:number, patientId:string, orderStatus:string)=>request.get<any,UserOrderInfoResponseData>(API.USERORDERINFO_URL+`${page}/${limit}?patientId=${patientId}&orderStatus=${orderStatus}`)
+//获取全部就诊人的信息
+export const reqAllUser = () => request.get<any, AllUserResponseData>(API.ALLUSER_URL);
+//获取全部订单的接口
+export const reqOrderState = () => request.get<any, AllOrderStateResponseData>(API.ORDERSTATE_URL);

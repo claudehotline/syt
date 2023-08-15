@@ -82,7 +82,7 @@ import { User } from '@element-plus/icons-vue';
 //引入就诊人信息接口
 import { reqGetUser, reqDoctorInfo } from '@/api/hospital';
 import { onMounted, ref } from 'vue';
-import Visitor from './visitor/index.vue';
+// import Visitor from './visitor/index.vue';
 import { reqSubmitOrder } from "@/api/user";
 import type { SubmitOrder } from '@/api/user/type';
 import type { UserResponseData, UserArr, DoctorInfoData, Doctor } from '@/api/hospital/type'
