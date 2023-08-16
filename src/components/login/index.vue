@@ -106,6 +106,9 @@ import { User, Lock } from '@element-plus/icons-vue'
 import useUserStore from "@/store/modules/user";
 import type { WXLoginResponseData } from '@/api/hospital/type';
 import { ElMessage } from 'element-plus';
+import { useRoute, useRouter } from 'vue-router';
+let $router = useRouter();
+let $route = useRoute();
 let userStore = useUserStore();
 //定义一个响应式数据控制倒计时组件显示与隐藏
 let flag = ref<boolean>(false);//flag如果为真，开启倒计时
@@ -185,6 +188,14 @@ const login = async () => {
         await userStore.userLogin(loginParam);
         //如果登录成功关闭对话框
         userStore.visible = false;
+
+        //获取url上的query参数
+        let redirect = $route.query.redirect;
+        if(redirect){
+            $router.push(redirect as string);
+        }else{
+            $router.push('/home');
+        }
     } catch (error) {
         ElMessage({
             type: 'error',

@@ -1,6 +1,6 @@
 //引入二次封装的axios
 import request from '@/utils/request';
-import type { AllOrderStateResponseData, AllUserResponseData, UserOrderInfoResponseData, UserParams, CertificationTypeResponseData, UserInfoResponseData, QrCode, SubmitOrder, OrderResponseData,PayResult } from './type';
+import type { AddOrUpdateUser, AllOrderStateResponseData, AllUserResponseData, UserOrderInfoResponseData, UserParams, CertificationTypeResponseData, UserInfoResponseData, QrCode, SubmitOrder, OrderResponseData,PayResult } from './type';
 
 enum API{
     SUBMITORDER_URL='/order/orderInfo/auth/submitOrder/',
@@ -23,7 +23,15 @@ enum API{
     //获取全部就诊人的信息
     ALLUSER_URL='/user/patient/auth/findAll',
     //获取订单的状态
-    ORDERSTATE_URL='/order/orderInfo/auth/getStatusList'
+    ORDERSTATE_URL='/order/orderInfo/auth/getStatusList',
+    //获取中国各个城市的数据
+    CITY_URL='/cmn/dict/findByParentId/',
+    //新增就诊人的接口
+    ADDUSER_URL='/user/patient/auth/save/',
+    //更新已有的就诊人接口
+    UPDATEUSER_URL='/user/patient/auth/update/',
+    //删除已有就诊人
+    DELETEUSER_URL='/user/patient/auth/remove/'
 }
 
 //提交订单
@@ -48,3 +56,15 @@ export const reqUserOrderInfo = (page:number, limit:number, patientId:string, or
 export const reqAllUser = () => request.get<any, AllUserResponseData>(API.ALLUSER_URL);
 //获取全部订单的接口
 export const reqOrderState = () => request.get<any, AllOrderStateResponseData>(API.ORDERSTATE_URL);
+//获取城市的数据
+export const reqCity = (parentId:string) => request.get<any,any>(API.CITY_URL+parentId);
+//新增与修改已有的就诊人接口的方法
+export const reqAddOrUpdateUser = (data:AddOrUpdateUser) => {
+    if(data.id){
+        return request.put<any,any>(API.UPDATEUSER_URL, data);
+    } else {
+        return request.post<any, any>(API.ADDUSER_URL, data);
+    }
+}
+//删除某一个就诊人的信息
+export const reqRemoveUser = (id:number) => request.delete<any, any>(API.DELETEUSER_URL+id);

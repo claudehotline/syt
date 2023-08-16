@@ -15,6 +15,7 @@ import 'element-plus/dist/index.css';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 //引入pinia仓库
 import pinia from '@/store'
+import './permission'
 //利用createApp方法创建应用实例，且将应用实例挂在到挂载点上
 const app = createApp(App);
 import Visitor from '@/components/visitor/visitor.vue';

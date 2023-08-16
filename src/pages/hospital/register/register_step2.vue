@@ -8,7 +8,7 @@
       <template #header>
         <div class="card-header">
           <span>请选择就诊人</span>
-          <el-button type="primary" size="default" :icon="User">添加就诊人</el-button>
+          <el-button type="primary" size="default" :icon="User" @click="goUser">添加就诊人</el-button>
         </div>
       </template>
       <!--卡片的身体部分显示就诊人信息-->
@@ -147,6 +147,12 @@ const submitOrder = async () => {
       message: result.message
     })
   }
+}
+
+//预约挂号添加就诊人按钮方法
+const goUser = () => {
+  //路由跳转
+  $router.push({path:'/user/paitent', query:{type:'add'}})
 }
 </script>
 

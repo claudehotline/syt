@@ -6,6 +6,7 @@ specifiers:
   '@vitejs/plugin-vue': ^4.2.3
   axios: ^1.4.0
   element-plus: ^2.3.9
+  nprogress: ^0.2.0
   pinia: ^2.1.6
   qrcode: ^1.5.3
   sass: ^1.64.2
@@ -19,6 +20,7 @@ dependencies:
   '@element-plus/icons-vue': 2.1.0_vue@3.3.4
   axios: 1.4.0
   element-plus: 2.3.9_vue@3.3.4
+  nprogress: 0.2.0
   pinia: 2.1.6_typescript@5.1.6+vue@3.3.4
   qrcode: 1.5.3
   sass: 1.64.2
@@ -828,6 +830,10 @@ packages:
 
   /normalize-wheel-es/1.2.0:
     resolution: {integrity: sha512-Wj7+EJQ8mSuXr2iWfnujrimU35R2W4FAErEyTmJoJ7ucwTn2hOUSsRehMb5RSYkxXGTM7Y9QpvPmp++w5ftoJw==}
+    dev: false
+
+  /nprogress/0.2.0:
+    resolution: {integrity: sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==}
     dev: false
 
   /p-limit/2.3.0:
